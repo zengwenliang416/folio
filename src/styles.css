@@ -214,28 +214,10 @@ kbd {
 .brand-mark {
   width: 20px;
   height: 24px;
-  border-radius: 5px;
-  background: var(--accent);
-  position: relative;
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+  background: url("./assets/excerpt-mark-16-color-light.svg") center / 16px no-repeat;
 }
-.brand-mark::before,
-.brand-mark::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  height: 2px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.92);
-}
-.brand-mark::before {
-  top: 8px;
-  width: 10px;
-  box-shadow: 0 4px 0 rgba(255, 255, 255, 0.92);
-}
-.brand-mark::after {
-  top: 16px;
-  width: 6px;
+[data-theme="dark"] .brand-mark {
+  background-image: url("./assets/excerpt-mark-16-color-dark.svg");
 }
 .brand-name {
   font-weight: 650;
