@@ -88,7 +88,7 @@
         "nsis",
         "portable"
       ],
-      "icon": "build/icon.png"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -108,7 +108,7 @@
         "name": "PDF Document",
         "description": "PDF Document",
         "role": "Viewer",
-        "icon": "build/icon.png"
+        "icon": "build/icon"
       }
     ],
     "publish": [
@@ -157,7 +157,7 @@
         }
       ],
       "category": "public.app-category.productivity",
-      "icon": "build/icon.png",
+      "icon": "build/icon.icns",
       "fileAssociations": [
         {
           "ext": [
@@ -182,7 +182,7 @@
         "deb"
       ],
       "category": "Office",
-      "icon": "build/icon.png",
+      "icon": "build/icons",
       "synopsis": "A simple, clean PDF reader",
       "maintainer": "Forward Future <748450+mberman84@users.noreply.github.com>",
       "mimeTypes": [

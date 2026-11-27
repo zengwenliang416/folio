@@ -269,7 +269,7 @@ function createWindow() {
     show: false,
     backgroundColor: TITLEBAR[theme].color,
     title: "Folio",
-    icon: path.join(__dirname, "icon.png"),
+    icon: path.join(__dirname, process.platform === "win32" ? "icon.ico" : "icon.png"),
     titleBarStyle: "hidden",
     // macOS keeps its traffic lights (inset into the top bar); Windows and Linux draw their window
     // buttons as an overlay on the right.
