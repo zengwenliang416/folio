@@ -73,15 +73,21 @@ function electronBinary() {
 // Runs fn(electron, arg) in Folio's main process over its Node inspector, like Playwright's electronApplication.evaluate.
 async function main(state, fn, arg) {
   const socket = new WebSocket(state.inspector);
+  let timer;
   try {
-    await new Promise((resolve, reject) => { socket.onopen = resolve; socket.onerror = () => reject(new Error("the main process inspector did not answer")); });
-    const reply = new Promise((resolve) => { socket.onmessage = (event) => { const message = JSON.parse(event.data); if (message.id === 1) resolve(message.result); }; });
-    socket.send(JSON.stringify({ id: 1, method: "Runtime.evaluate", params: { awaitPromise: true, returnByValue: true,
-      expression: `(${fn})(process.mainModule.require("electron"), ${JSON.stringify(arg ?? null)})` } }));
-    const { result, exceptionDetails } = await reply;
+    const { result, exceptionDetails } = await new Promise((resolve, reject) => {
+      timer = setTimeout(() => reject(new Error("the main process did not answer within 15 s")), 15_000);
+      socket.onerror = () => reject(new Error("the main process inspector did not answer"));
+      socket.onopen = () => socket.send(JSON.stringify({ id: 1, method: "Runtime.evaluate", params: { awaitPromise: true, returnByValue: true,
+        expression: `(${fn})(process.mainModule.require("electron"), ${JSON.stringify(arg ?? null)})` } }));
+      socket.onmessage = (event) => { const message = JSON.parse(event.data); if (message.id === 1) resolve(message.result); };
+    });
     if (exceptionDetails) throw new Error(exceptionDetails.exception?.description ?? exceptionDetails.text);
     return result.value;
-  } finally { socket.close(); }
+  } finally {
+    clearTimeout(timer);
+    socket.close();
+  }
 }
 
 // Everything Folio hands to macOS in front of the user (message boxes, a download's save panel, printing, another app,
@@ -177,13 +183,12 @@ async function start() {
       catch { return null; }
     }));
     writeState(state);
-    await until("guard", 30_000, () => main(state, ({ BrowserWindow }) => BrowserWindow.getAllWindows().length > 0).catch(() => false));
-    try { await main(state, guard, path.join(evidence, "downloads")); }
-    catch (error) { throw new StepError("guard", error.message); }
     const { browser, page } = await until("renderer", 30_000, () => connect(state.port).catch(() => null));
     try { await page.getByRole("button", { name: /Try a sample/ }).waitFor({ timeout: 30_000 }); }
     catch (error) { throw new StepError("renderer", `library never showed "Try a sample document": ${error.message.split("\n")[0]}`); }
     finally { await browser.close(); }
+    try { await main(state, guard, path.join(evidence, "downloads")); }
+    catch (error) { throw new StepError("guard", error.message); }
   } catch (error) {
     await stop();
     throw error;
@@ -264,7 +269,9 @@ async function drive(rest) {
   const log = (...a) => { const line = a.join(" "); lines.push(`${new Date().toISOString()} ${line}`); console.log(line); };
   const { browser, window, page } = await connect(state.port);
   const errors = [];
+  const dialogs = [];
   window.on("pageerror", (error) => errors.push(error.stack ?? String(error)));
+  window.on("dialog", (dialog) => { dialogs.push(`${dialog.type()} "${dialog.message()}"`); void dialog.dismiss(); });
   const shot = async (label) => {
     const base = path.join(dir, label);
     await window.screenshot({ path: base + ".png" });
@@ -290,6 +297,13 @@ async function drive(rest) {
     }
     throw new Error("a download was still in progress after 30 s");
   };
+  const downloads = async (count) => {
+    for (const t0 = Date.now(); Date.now() - t0 < 30_000; await sleep(200)) {
+      const saved = (await main(state, () => globalThis.verifyFolio.calls)).filter((c) => c.call === "download");
+      if (saved.length >= count && saved.every((c) => c.state !== "progressing")) return saved;
+    }
+    throw new Error(`fewer than ${count} downloads finished within 30 s`);
+  };
   const answer = (button) => main(state, (_electron, button) => { globalThis.verifyFolio.answers.push(button); }, button);
   const readPdf = async (file) => {
     const { getDocument } = await import(pathToFileURL(createRequire(import.meta.url).resolve("pdfjs-dist/legacy/build/pdf.mjs")));
@@ -301,7 +315,7 @@ async function drive(rest) {
     return pages;
   };
   const nativeBefore = (await main(state, () => globalThis.verifyFolio.calls)).length;
-  const ctx = { page, window, root, evidence: dir, step, shot, openFile, native, answer, readPdf, assert, log };
+  const ctx = { page, window, root, evidence: dir, step, shot, openFile, native, downloads, answer, readPdf, assert, log };
   try {
     const journey = inline
       ? new (async () => {}).constructor("ctx", `const { ${Object.keys(ctx).join(", ")} } = ctx;\n${rest[1]}`)
@@ -309,6 +323,7 @@ async function drive(rest) {
     const value = await journey(ctx);
     if (value !== undefined) log("result", JSON.stringify(value));
     assert.deepEqual(errors, [], "the page threw while driving");
+    assert.deepEqual(dialogs, [], "the page opened a JavaScript dialog, which the guard does not cover; see Drive in SKILL.md");
     log("PASS", name, "evidence", dir);
   } catch (error) {
     log("FAIL", name, error.stack ?? String(error));

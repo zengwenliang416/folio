@@ -45,7 +45,7 @@ It prints one `step` line per action and `PASS annotate evidence <dir>`. Each st
   the page, then `sheet.locator('.freeTextEditor .internal[contenteditable="true"]').fill("Checked by verify-folio")`
   and a click elsewhere on `sheet`. One `.freeTextEditor` holds the text and `Select` is pressed.
 - **Save a copy.** `More`, then `page.getByRole("menuitem", { name: /Save a copy/ }).click()`. The toast reads
-  `Saved a copy with your highlights and notes`. `native()` holds a completed `download` of
+  `Saved a copy with your highlights and notes`. `downloads(1)` returns a completed download of
   `downloads/<n>-Folio sample.pdf` in the run's evidence dir, and `pdfjs-dist`'s `getAnnotations` on it gives page 1
   the subtypes `FreeText`, `Highlight` and `Ink`, the `FreeText` reading `Checked by verify-folio`, and no other
   page any annotation.
@@ -68,6 +68,6 @@ It prints one `step` line per action and `PASS annotate evidence <dir>`. Each st
   checks with `document.elementFromPoint` that its spots are on the page's editor layer.
 - `readPdf` returns only text, and a text box is not part of a page's text. Read annotations with `pdfjs-dist`'s
   `getAnnotations` in the journey.
-- The download can register after the toast. Wait for the `download` call in `native()`, not for the toast.
+- The download can register after the toast. Wait with `downloads(count)`, not for the toast.
 - `Sign` uses a drawn, typed or camera signature in a dialog, and the camera path asks through the guard. The journey
   leaves `Sign` and `Edit mode` out, since they are features of their own.

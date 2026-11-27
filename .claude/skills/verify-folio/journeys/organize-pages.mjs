@@ -2,7 +2,7 @@
 // pages whose text starts as below.
 const starts = { 1: "A short tour of Folio", 2: "Finding text", 3: "Asking AI", 4: "Save a copy" };
 
-export default async function organizePages({ page, window, step, native, readPdf, assert }) {
+export default async function organizePages({ page, window, step, downloads, readPdf, assert }) {
   const sidebar = page.locator("aside.sidebar");
   const organizer = page.getByRole("complementary", { name: "Organize pages" });
   const docs = page.getByRole("tablist", { name: "Open documents" });
@@ -10,13 +10,11 @@ export default async function organizePages({ page, window, step, native, readPd
   const order = async () => (await organizer.locator(".thumb").evaluateAll((all) => all.map((t) => t.getAttribute("aria-label"))))
     .map((label) => Number(/^Page (\d+),/.exec(label)[1]));
   const saved = async (count) => {
-    let downloads = [];
-    for (const t0 = Date.now(); downloads.length < count && Date.now() - t0 < 30_000; await new Promise((r) => setTimeout(r, 200)))
-      downloads = (await native()).filter((c) => c.call === "download");
-    assert.equal(downloads.length, count);
-    assert.equal(downloads.at(-1).state, "completed");
-    assert.match(downloads.at(-1).file, /Folio sample \(organized\)\.pdf$/);
-    return readPdf(downloads.at(-1).file);
+    const files = await downloads(count);
+    assert.equal(files.length, count);
+    assert.equal(files.at(-1).state, "completed");
+    assert.match(files.at(-1).file, /Folio sample \(organized\)\.pdf$/);
+    return readPdf(files.at(-1).file);
   };
   const which = (text) => Number(Object.keys(starts).find((n) => text.startsWith(starts[n])) ?? 0);
 

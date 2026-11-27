@@ -24,10 +24,9 @@ On Windows and Linux, use `npm run smoke`.
 launches the copy of Electron from `scripts/electron-path.mjs`, which macOS treats as an agent app with no Dock icon.
 The process runs detached in its own process group with `FOLIO_TEST_USER_DATA` and `FOLIO_TEST_HIDDEN=1` (both read by
 `electron/main.cjs`), `--user-data-dir=<data dir>`, `--inspect=0`, `--remote-debugging-port=0` and `--mute-audio`.
-Once the window exists, `start` installs the native guard described in [Drive](#drive) through the main process's
-inspector. It returns when the library shows **Try a sample document**, prints the pid, port, data dir and evidence
-dir, and runs Doctor. Exit 0 means the app is ready to drive. If a step fails, `start` ends what it launched, keeps
-`app.log`, and prints `FAIL <step>`, where the step is `build`, `electron`, `spawn`, `devtools`, `guard` or `renderer`.
+Once the library shows **Try a sample document**, `start` installs the native guard described in [Drive](#drive)
+through the main process's inspector. It then prints the pid, port, data dir and evidence dir, and runs Doctor. Exit 0 means the app is ready to drive. If a step fails, `start` ends what it launched, keeps
+`app.log`, and prints `FAIL <step>`, where the step is `build`, `electron`, `spawn`, `devtools`, `renderer` or `guard`.
 
 `start` takes about 3 s and leaves Folio running. If your instructions route long jobs through a queue, run
 `npm run build` and `start` through it.
@@ -91,6 +90,7 @@ value it returns is printed. A drive fails with exit 1 on a thrown error or an u
 | `shot(label)` | Saves a screenshot and an ARIA snapshot now |
 | `openFile(files, trigger)` | Queues the files for the next file chooser, then runs `trigger`, which defaults to pressing `ControlOrMeta+o`. Paths are relative to the checkout |
 | `native()` | Every call Folio made to the guard, returned once no download is still in progress |
+| `downloads(count)` | The guard's download records, returned once at least `count` downloads have finished. Each has `file`, `state` and `bytes` |
 | `answer(button)` | Sets the button index that the next message box gets |
 | `readPdf(file)` | The text of each page of a PDF, read with `pdfjs-dist` outside Folio |
 | `assert`, `root`, `evidence`, `log` | `node:assert/strict`, the checkout root, this drive's evidence dir, and a logger that also writes `steps.log` |
@@ -108,6 +108,11 @@ value it returns is printed. A drive fails with exit 1 on a thrown error or an u
   other way stays unanswered and shows in `native()` as `fileChooser` with `files: null`.
 
 Each drive prints the guard calls it caused as `native {...}` lines and keeps them in `steps.log`.
+
+The guard does not cover the page's own `window.confirm`. Folio uses it before it closes a tab with unsaved changes
+and for **Clear all** in **Recent**. A drive that opens one dismisses it and fails. Whether Electron shows it on screen
+before the dismissal is unverified, so do not drive those paths here. `scripts/smoke-test.mjs` stubs `confirm` for
+them.
 
 Stable handles, all inside `page`, from `scripts/smoke-test.mjs` and `scripts/smoke-reader-tools.mjs`:
 

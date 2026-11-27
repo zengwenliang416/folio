@@ -15,7 +15,7 @@ async function annotations(file) {
   } finally { await task.destroy(); }
 }
 
-export default async function annotate({ page, step, native, assert }) {
+export default async function annotate({ page, step, downloads, assert }) {
   const tools = page.getByRole("toolbar", { name: "Tools" });
   const tool = (name) => tools.getByRole("button", { name, exact: true });
   const options = page.getByRole("toolbar", { name: "Annotation options" });
@@ -32,13 +32,11 @@ export default async function annotate({ page, step, native, assert }) {
   const onLayer = ({ x, y }) => page.evaluate(({ x, y }) =>
     document.elementFromPoint(x, y) === document.querySelector('.page[data-page-number="1"] .annotationEditorLayer'), { x, y });
   const saved = async (count) => {
-    let downloads = [];
-    for (const t0 = Date.now(); downloads.length < count && Date.now() - t0 < 30_000; await new Promise((r) => setTimeout(r, 200)))
-      downloads = (await native()).filter((c) => c.call === "download");
-    assert.equal(downloads.length, count);
-    assert.equal(downloads.at(-1).state, "completed");
-    assert.match(downloads.at(-1).file, /Folio sample\.pdf$/);
-    const [first, ...rest] = await annotations(downloads.at(-1).file);
+    const files = await downloads(count);
+    assert.equal(files.length, count);
+    assert.equal(files.at(-1).state, "completed");
+    assert.match(files.at(-1).file, /Folio sample\.pdf$/);
+    const [first, ...rest] = await annotations(files.at(-1).file);
     assert.deepEqual(first.map((a) => a.subtype).sort(), ["FreeText", "Highlight", "Ink"]);
     assert.equal(first.find((a) => a.subtype === "FreeText").text, typed);
     assert.deepEqual(rest.flat(), []);

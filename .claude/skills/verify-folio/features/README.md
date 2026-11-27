@@ -25,13 +25,14 @@ then use the matching feature file as the recipe.
 - The native guard answers message boxes with their cancel button or the one set with `answer`, records
   `shell.openExternal`, `shell.openPath` and printing, saves every download under `downloads/`, and answers the file
   chooser through `openFile`. It does not answer the page's own `window.confirm`, which Folio uses before it closes a
-  tab with unsaved changes and before `Clear all` in `Recent`. Journeys never trigger one.
+  tab with unsaved changes and before `Clear all` in `Recent`. A drive that opens one dismisses it and fails, so
+  journeys never trigger one.
 
 ## Proof and skip reporting
 
 - Report the run name, the HEAD Doctor printed, the journey, the evidence dir, and the guard calls the proof relied on.
-- Prove a saved file outside Folio: take its path from the `download` call in `native()`, which can register after the
-  UI says it saved, and read it with `readPdf` for page text or `pdfjs-dist` for annotations.
+- Prove a saved file outside Folio. Take its path from `downloads(count)`, which waits, because a download can
+  register after the UI says it saved. Read it with `readPdf` for page text or `pdfjs-dist` for annotations.
 - A step that cannot run gets `FAIL` with the unmet precondition. Never weaken the journey to pass.
 - A path the harness cannot drive stays out of the journey and is named in its feature's `Gotchas`. Do not report an
   entry point as verified through a different entry point.

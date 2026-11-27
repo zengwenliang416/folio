@@ -51,8 +51,8 @@ It prints one `step` line per action and `PASS organize-pages evidence <dir>`. E
 - **Drag.** `thumb(1, 2).dragTo(thumb(3, 3))`. `Page 1, position 3` appears and the order is 4, 3, 1.
 - **Keep one page.** Click `Page 4, position 1`, then Shift-click `Page 1, position 3`. `Delete 3 pages` is disabled,
   and `Delete` leaves the order at 4, 3, 1.
-- **Save.** Choose `Save organized copy`. `Open organized copy` appears and `Cancel` reads `Done`. `native()` holds a
-  completed `download` of `downloads/<n>-Folio sample (organized).pdf` in the run's evidence dir, and `readPdf` of it
+- **Save.** Choose `Save organized copy`. `Open organized copy` appears and `Cancel` reads `Done`. `downloads(1)` returns a
+  completed download of `downloads/<n>-Folio sample (organized).pdf` in the run's evidence dir, and `readPdf` of it
   gives 3 pages starting `Save a copy`, `Asking AI`, `A short tour of Folio`.
 - **Open the copy.** Choose `Open organized copy`. Tab `Folio sample (organized).pdf` is selected in tablist
   `Open documents`, the window title names it, and its text renders.
@@ -76,6 +76,6 @@ It prints one `step` line per action and `PASS organize-pages evidence <dir>`. E
   `Move page N to` box, or on no control at all. Clicking a thumbnail first is enough.
 - `Save organized copy` is disabled until the draft differs from the original.
 - `Open organized copy` appearing does not prove a file was written, and the download can finish after it appears.
-  Wait for the `download` call in `native()` and read the file with `readPdf`.
+  Wait with `downloads(count)` and read the file with `readPdf`.
 - An unsaved draft marks the tab as unsaved, so its close button reads `Close <name>, unsaved changes` and closing it
   asks with `window.confirm`, which the guard does not answer. Leave such a tab open; `stop` ends the app anyway.
