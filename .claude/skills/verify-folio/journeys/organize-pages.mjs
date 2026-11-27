@@ -1,6 +1,4 @@
-// features/organize-pages.md as one journey. Starts from the library of a fresh `start`; public/sample.pdf has four
-// pages whose text starts as below.
-const starts = { 1: "A short tour of Folio", 2: "Finding text", 3: "Asking AI", 4: "Save a copy" };
+const samplePageOpenings = { 1: "A short tour of Folio", 2: "Finding text", 3: "Asking AI", 4: "Save a copy" };
 
 export default async function organizePages({ page, window, step, downloads, readPdf, assert }) {
   const sidebar = page.locator("aside.sidebar");
@@ -16,7 +14,7 @@ export default async function organizePages({ page, window, step, downloads, rea
     assert.match(files.at(-1).file, /Folio sample \(organized\)\.pdf$/);
     return readPdf(files.at(-1).file);
   };
-  const which = (text) => Number(Object.keys(starts).find((n) => text.startsWith(starts[n])) ?? 0);
+  const which = (text) => Number(Object.keys(samplePageOpenings).find((n) => text.startsWith(samplePageOpenings[n])) ?? 0);
 
   await step("open the sample", async () => {
     assert.ok(await page.getByRole("button", { name: /Try a sample/ }).isVisible(), "the journey starts from the library; run stop and start first");

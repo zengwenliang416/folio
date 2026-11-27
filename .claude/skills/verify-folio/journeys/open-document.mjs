@@ -1,4 +1,3 @@
-// features/open-document.md as one journey. Starts from the library of a fresh `start`, whose Recent list is empty.
 const fixture = "scripts/fixtures/arabic-editing.pdf";
 
 export default async function openDocument({ page, window, step, openFile, native, assert }) {

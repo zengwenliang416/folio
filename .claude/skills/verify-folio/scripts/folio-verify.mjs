@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// Usage: folio-verify.mjs [--run <name>] start | doctor | drive <journey.mjs> | drive -e '<code>' | stop
 import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, readlinkSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -41,15 +40,14 @@ function processes() {
   });
 }
 
-// A process is the run's when it runs from the Electron bundle the run launched and carries the run's own data dir
-// (Chromium passes --user-data-dir to every helper), plus the main process's group. Never a process name.
-function owned(state) {
+// Chromium copies --user-data-dir onto every helper's command line.
+function runProcesses(state) {
   const list = processes();
   const bundle = state.exe.slice(0, state.exe.lastIndexOf(".app/") + ".app/".length);
   const flag = `--user-data-dir=${state.dataDir}`;
-  const tagged = list.filter((p) => p.command.startsWith(bundle) && (p.command.includes(flag + " ") || p.command.endsWith(flag)));
-  const leader = tagged.find((p) => p.pid === state.pid) ?? null;
-  const members = list.filter((p) => tagged.includes(p) || (leader && p.pgid === leader.pid));
+  const inBundleWithDataDir = list.filter((p) => p.command.startsWith(bundle) && (p.command.includes(flag + " ") || p.command.endsWith(flag)));
+  const leader = inBundleWithDataDir.find((p) => p.pid === state.pid) ?? null;
+  const members = list.filter((p) => inBundleWithDataDir.includes(p) || (leader && p.pgid === leader.pid));
   return { leader, members };
 }
 
@@ -70,8 +68,7 @@ function electronBinary() {
   return existsSync(bin) ? { bin } : { problem: `${bin} is missing` };
 }
 
-// Runs fn(electron, arg) in Folio's main process over its Node inspector, like Playwright's electronApplication.evaluate.
-async function main(state, fn, arg) {
+async function evaluateInMain(state, fn, arg) {
   const socket = new WebSocket(state.inspector);
   let timer;
   try {
@@ -90,9 +87,7 @@ async function main(state, fn, arg) {
   }
 }
 
-// Everything Folio hands to macOS in front of the user (message boxes, a download's save panel, printing, another app,
-// a file chooser) is recorded and answered here instead, so nothing reaches the screen. Chromium opens a page's file
-// chooser below Electron's dialog module, so that one is intercepted over the window's own debugger.
+// Chromium opens a page's file chooser below Electron's dialog module, so it is intercepted over the window's debugger.
 function guard({ dialog, shell, session, BrowserWindow }, downloads) {
   const win = BrowserWindow.getAllWindows()[0];
   const seen = globalThis.verifyFolio = { calls: [], answers: [], files: [] };
@@ -144,7 +139,7 @@ function git(...a) {
 async function start() {
   const prior = readState();
   if (prior && !prior.stoppedAt) {
-    const { members } = owned(prior);
+    const { members } = runProcesses(prior);
     if (members.length) throw new StepError("start", `run ${run} still has processes ${members.map((p) => p.pid).join(" ")}; run stop first, or pass --run <other-name>`);
     await stop();
   }
@@ -187,7 +182,7 @@ async function start() {
     try { await page.getByRole("button", { name: /Try a sample/ }).waitFor({ timeout: 30_000 }); }
     catch (error) { throw new StepError("renderer", `library never showed "Try a sample document": ${error.message.split("\n")[0]}`); }
     finally { await browser.close(); }
-    try { await main(state, guard, path.join(evidence, "downloads")); }
+    try { await evaluateInMain(state, guard, path.join(evidence, "downloads")); }
     catch (error) { throw new StepError("guard", error.message); }
   } catch (error) {
     await stop();
@@ -211,7 +206,7 @@ async function doctor() {
   const state = readState();
   if (!check("run", state && !state.stoppedAt, !state ? `no run ${run}; run start` : state.stoppedAt ? `run ${run} was stopped at ${state.stoppedAt}; run start` : `${run} (${stateFile})`)) return finish();
 
-  const { leader, members } = owned(state);
+  const { leader, members } = runProcesses(state);
   if (!check("process", leader && leader.command.startsWith(state.exe) && leader.command.endsWith(` ${root}`),
     leader ? `pid ${leader.pid}, processes ${members.map((p) => p.pid).join(" ")}, app ${root} at ${state.head.slice(0, 8)} (worktree HEAD ${git("rev-parse", "HEAD").slice(0, 8)})`
       : `pid ${state.pid} is gone; run stop, then start`)) return finish();
@@ -236,7 +231,7 @@ async function doctor() {
     `DevToolsActivePort ${port} (recorded ${state.port}) and inspector ${inspectorPort} ${listens(port) && listens(inspectorPort) ? "both listened on by" : "NOT both listened on by"} pid ${state.pid}`)) return finish();
 
   try {
-    const seen = await main(state, ({ app, BrowserWindow }) => ({ userData: app.getPath("userData"), version: app.getVersion(),
+    const seen = await evaluateInMain(state, ({ app, BrowserWindow }) => ({ userData: app.getPath("userData"), version: app.getVersion(),
       guarded: !!globalThis.verifyFolio && BrowserWindow.getAllWindows()[0]?.webContents.debugger.isAttached() }));
     const version = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")).version;
     check("guard", seen.guarded && seen.userData === state.dataDir && seen.version === version,
@@ -259,7 +254,7 @@ async function doctor() {
 
 async function drive(rest) {
   const state = readState();
-  if (!state || state.stoppedAt || !owned(state).leader) throw new StepError("drive", `run ${run} is not running; run doctor`);
+  if (!state || state.stoppedAt || !runProcesses(state).leader) throw new StepError("drive", `run ${run} is not running; run doctor`);
   const inline = rest[0] === "-e";
   if (!rest[inline ? 1 : 0]) throw new StepError("drive", "usage: drive <journey.mjs> | drive -e '<code>'");
   const name = inline ? "eval" : path.basename(rest[0], ".mjs");
@@ -287,24 +282,24 @@ async function drive(rest) {
     return value;
   };
   const openFile = async (files, trigger = () => page.keyboard.press("ControlOrMeta+o")) => {
-    await main(state, (_electron, files) => { globalThis.verifyFolio.files.push(files); }, [files].flat().map((f) => path.resolve(root, f)));
+    await evaluateInMain(state, (_electron, files) => { globalThis.verifyFolio.files.push(files); }, [files].flat().map((f) => path.resolve(root, f)));
     await trigger();
   };
   const native = async () => {
     for (const t0 = Date.now(); Date.now() - t0 < 30_000; await sleep(200)) {
-      const calls = await main(state, () => globalThis.verifyFolio.calls);
+      const calls = await evaluateInMain(state, () => globalThis.verifyFolio.calls);
       if (calls.every((c) => c.state !== "progressing")) return calls;
     }
     throw new Error("a download was still in progress after 30 s");
   };
   const downloads = async (count) => {
     for (const t0 = Date.now(); Date.now() - t0 < 30_000; await sleep(200)) {
-      const saved = (await main(state, () => globalThis.verifyFolio.calls)).filter((c) => c.call === "download");
+      const saved = (await evaluateInMain(state, () => globalThis.verifyFolio.calls)).filter((c) => c.call === "download");
       if (saved.length >= count && saved.every((c) => c.state !== "progressing")) return saved;
     }
     throw new Error(`fewer than ${count} downloads finished within 30 s`);
   };
-  const answer = (button) => main(state, (_electron, button) => { globalThis.verifyFolio.answers.push(button); }, button);
+  const answer = (button) => evaluateInMain(state, (_electron, button) => { globalThis.verifyFolio.answers.push(button); }, button);
   const readPdf = async (file) => {
     const { getDocument } = await import(pathToFileURL(createRequire(import.meta.url).resolve("pdfjs-dist/legacy/build/pdf.mjs")));
     const task = getDocument({ data: new Uint8Array(readFileSync(file)), verbosity: 0 });
@@ -314,7 +309,7 @@ async function drive(rest) {
     await task.destroy();
     return pages;
   };
-  const nativeBefore = (await main(state, () => globalThis.verifyFolio.calls)).length;
+  const nativeBefore = (await evaluateInMain(state, () => globalThis.verifyFolio.calls)).length;
   const ctx = { page, window, root, evidence: dir, step, shot, openFile, native, downloads, answer, readPdf, assert, log };
   try {
     const journey = inline
@@ -341,11 +336,11 @@ async function drive(rest) {
 async function stop() {
   const state = readState();
   if (!state) return console.log(`no run ${run}; nothing to stop`);
-  const { members } = owned(state);
+  const { members } = runProcesses(state);
   const alive = (p) => { try { process.kill(p.pid, 0); return true; } catch (e) { if (e.code === "ESRCH") return false; throw e; } };
   for (const p of members) { try { process.kill(p.pid, "SIGKILL"); } catch (e) { if (e.code !== "ESRCH") throw e; } }
   for (const t0 = Date.now(); members.some(alive) && Date.now() - t0 < 5_000;) await sleep(100);
-  const left = owned(state).members;
+  const left = runProcesses(state).members;
   if (left.length) throw new StepError("stop", `still running: ${left.map((p) => p.pid).join(" ")}`);
   rmSync(state.dataDir, { recursive: true, force: true });
   writeState({ ...state, stoppedAt: state.stoppedAt ?? new Date().toISOString(), ended: state.ended ?? members.map((p) => p.pid) });

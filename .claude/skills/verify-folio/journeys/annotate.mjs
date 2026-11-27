@@ -1,6 +1,5 @@
-// features/annotate.md as one journey. Starts from the library of a fresh `start`; public/sample.pdf has no
-// annotations of its own.
 import { readFileSync } from "node:fs";
+import path from "node:path";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 const typed = "Checked by verify-folio";
@@ -15,7 +14,7 @@ async function annotations(file) {
   } finally { await task.destroy(); }
 }
 
-export default async function annotate({ page, step, downloads, assert }) {
+export default async function annotate({ page, step, downloads, assert, root }) {
   const tools = page.getByRole("toolbar", { name: "Tools" });
   const tool = (name) => tools.getByRole("button", { name, exact: true });
   const options = page.getByRole("toolbar", { name: "Annotation options" });
@@ -44,6 +43,7 @@ export default async function annotate({ page, step, downloads, assert }) {
 
   await step("open the sample", async () => {
     assert.ok(await page.getByRole("button", { name: /Try a sample/ }).isVisible(), "the journey starts from the library; run stop and start first");
+    assert.deepEqual((await annotations(path.join(root, "public", "sample.pdf"))).flat(), [], "public/sample.pdf starts without annotations");
     await page.getByRole("button", { name: /Try a sample/ }).click();
     await page.locator(".doc-title", { hasText: "Folio sample.pdf" }).waitFor();
     await sheet.locator(".textLayer span:not(.markedContent)").first().waitFor({ timeout: 30_000 });

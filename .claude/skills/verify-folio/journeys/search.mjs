@@ -1,5 +1,3 @@
-// features/search.md as one journey. Starts from the library of a fresh `start`; public/sample.pdf has "lighthouse"
-// four times, all on page 2, always lowercase.
 export default async function search({ page, step, assert }) {
   const box = page.getByRole("textbox", { name: "Find in document" });
   const status = (text) => page.getByRole("search").getByRole("status").filter({ hasText: text }).waitFor();
@@ -37,7 +35,7 @@ export default async function search({ page, step, assert }) {
     await status(/^1 of 4$/);
   });
 
-  await step("match case drops the capitalized word", async () => {
+  await step("match case finds no Lighthouse in the all-lowercase sample", async () => {
     await page.getByTitle("Match case").click();
     await box.fill("Lighthouse");
     await status(/^No results$/);
