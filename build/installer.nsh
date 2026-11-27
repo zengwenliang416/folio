@@ -28,7 +28,7 @@
   ${AndIf} ${isUpdated}
   ${AndIf} ${isForceRun}
     ${IfNot} ${UAC_IsInnerInstance}
-      Banner::show /NOUNLOAD /set 1030 "Folio will reopen when the update finishes." "Updating Folio"
+      Banner::show /NOUNLOAD /set 1030 "Mnemark will reopen when the update finishes." "Updating Mnemark"
     ${EndIf}
     !insertmacro holdPreviousExecutable
   ${EndIf}

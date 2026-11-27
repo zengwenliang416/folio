@@ -160,7 +160,7 @@ async function builtIn(source, dir, title) {
   await fs.promises.mkdir(htmlDir);
   const htmlFile = path.join(htmlDir, "document.html");
   if (/\.docx$/i.test(source)) {
-    await runWorker("docx-worker.cjs", "Folio Word converter", { source, output: htmlFile, title });
+    await runWorker("docx-worker.cjs", "Mnemark Word converter", { source, output: htmlFile, title });
   } else if (process.platform === "darwin") {
     await run("/usr/bin/textutil", ["-format", "doc", "-convert", "html", "-output", htmlFile, source]);
     const text = (await readRegular(htmlFile, MAX_HTML_BYTES)).toString("utf8");
@@ -197,7 +197,7 @@ async function convertStaged(source, dir, title, log) {
   }
   if (!only || only === "builtin") {
     try { return await builtIn(source, dir, title); }
-    catch (error) { fail("Folio", error); }
+    catch (error) { fail("Mnemark", error); }
   }
   throw Object.assign(new Error(failures.join("\n")), { userMessage: "The document may be damaged or protected with a password." });
 }
@@ -217,7 +217,7 @@ async function convertDocument(file, log) {
       try {
         const ready = path.join(dir, "publish.pdf");
         await fs.promises.writeFile(ready, data, { flag: "wx", mode: 0o600 });
-        const { index } = await runWorker("word-publish.cjs", "Folio Word export", { location: staged.location, ready });
+        const { index } = await runWorker("word-publish.cjs", "Mnemark Word export", { location: staged.location, ready });
         if (index) {
           const name = pdfName(staged.location.name, index);
           await rememberPdf(profile, staged, index, data).catch((error) => log(error.message));

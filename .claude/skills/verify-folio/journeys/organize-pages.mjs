@@ -84,7 +84,7 @@ export default async function organizePages({ page, window, step, downloads, rea
   await step("open organized copy opens it in a new tab", async () => {
     await organizer.getByRole("button", { name: "Open organized copy" }).click();
     await docs.getByRole("tab", { name: "Folio sample (organized).pdf", exact: true, selected: true }).waitFor();
-    await window.waitForFunction(() => document.title === "Folio sample (organized).pdf — Folio");
+    await window.waitForFunction(() => document.title === "Folio sample (organized).pdf — Mnemark");
     await page.locator(".textLayer span:not(.markedContent)").first().waitFor({ timeout: 30_000 });
   });
 

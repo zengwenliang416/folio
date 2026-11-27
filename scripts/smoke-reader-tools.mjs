@@ -539,7 +539,7 @@ async function checkRightToLeftEditing(app, page, shots) {
   const sheet = page.locator('.page[data-page-number="1"]');
   const latin = sheet.getByRole("button", { name: "Latin", exact: true });
   const input = sheet.getByRole("textbox", { name: "Edit text on page" });
-  const message = page.getByText(/Folio can.t edit right-to-left text/);
+  const message = page.getByText(/Mnemark can.t edit right-to-left text/);
   await latin.waitFor();
   // PDFium may hand the Hebrew back in either order, so find the run by its lock, not its label.
   const locked = sheet.locator(".folio-content-target[data-locked]");

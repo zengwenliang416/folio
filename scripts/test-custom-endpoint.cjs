@@ -89,7 +89,7 @@ test("a local address is confirmed before anything is sent, and only the approve
   await assert.rejects(endpoint.models(), /haven't approved\. Connect it again in Settings/);
   // If a plain http name later points outside the local network, nothing is sent and the message says why.
   net.fetch = async () => { throw Object.assign(new Error("refused"), { code: "public_refused" }); };
-  await assert.rejects(endpoint.models(), /outside this computer and your local network, so Folio sent nothing over plain http/);
+  await assert.rejects(endpoint.models(), /outside this computer and your local network, so Mnemark sent nothing over plain http/);
   // A saved http address without an approval (hand-edited) isn't trusted.
   fs.writeFileSync(file("custom-endpoint.json"), JSON.stringify({ baseUrl: "http://ollama.lan:11434/v1", hasKey: false, local: null }));
   assert.equal(endpoint.status().configured, false);

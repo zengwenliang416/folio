@@ -529,7 +529,7 @@ export default function App({ tabs, tabKey, upgradeNotes }: { tabs: DocumentTabs
         setPending(null);
         setSearchOpen(false);
         setFind({ current: 0, total: 0, state: null });
-        document.title = `${name} — Folio`;
+        document.title = `${name} — Mnemark`;
 
         setLoading(false);
         // Password-protected documents stay out of Recent: it would keep their bytes and a page-1
@@ -1406,9 +1406,9 @@ export default function App({ tabs, tabKey, upgradeNotes }: { tabs: DocumentTabs
     >
       <header className="topbar" ref={headerRef}>
         <div className="topbar-left">
-          <button className="brand" onClick={doc ? () => tabs.library() : undefined} title={doc ? "Back to library" : "Folio"}>
+          <button className="brand" onClick={doc ? () => tabs.library() : undefined} title={doc ? "Back to library" : "Mnemark"}>
             <span className="brand-mark" />
-            <span className="brand-name">Folio</span>
+            <span className="brand-name">Mnemark</span>
           </button>
           {doc && (
             <>
@@ -1485,7 +1485,7 @@ export default function App({ tabs, tabKey, upgradeNotes }: { tabs: DocumentTabs
                 : []),
               { kind: "action", icon: "settings", label: "Settings", shortcut: keys("Ctrl ,"), onSelect: () => setDialog("settings") },
               { kind: "action", icon: "keyboard", label: "Keyboard shortcuts", shortcut: "?", onSelect: () => setDialog("shortcuts") },
-              { kind: "action", icon: "info", label: "About Folio", onSelect: () => setDialog("about") },
+              { kind: "action", icon: "info", label: "About Mnemark", onSelect: () => setDialog("about") },
             ]}
           />
         </div>
@@ -1776,7 +1776,7 @@ export default function App({ tabs, tabKey, upgradeNotes }: { tabs: DocumentTabs
       {updateVersion && (
         <div className="update-card" role="status">
           <div>
-            <strong>Folio {updateVersion} is ready</strong>
+            <strong>Mnemark {updateVersion} is ready</strong>
             <span>Restart to update. Installation on close follows your auto-update setting.</span>
           </div>
           <button

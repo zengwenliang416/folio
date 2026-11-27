@@ -44,7 +44,7 @@ function UpdateLine({ status }: { status: UpdateStatus }) {
         <>
           {" · "}
           <button className="link version-action" onClick={() => void desktop.openDownload()}>
-            Download Folio {status.version}
+            Download Mnemark {status.version}
           </button>
         </>
       );
@@ -166,7 +166,7 @@ export function Welcome({ active, onPick, onOpenUrl, onOpenRecent, onSample, loa
 
         {version && (
           <p className="version">
-            Folio {version}
+            Mnemark {version}
             {update && <UpdateLine status={update} />}
           </p>
         )}

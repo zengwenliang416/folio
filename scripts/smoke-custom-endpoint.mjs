@@ -61,7 +61,7 @@ export async function checkCustomEndpoint(app, page) {
     await settings.getByLabel("Base URL").fill(`http://${host}/v1/`);
     await settings.getByLabel("API key (optional)").fill("fixture-only-endpoint-key");
     await settings.getByRole("button", { name: "Connect" }).click();
-    await settings.getByRole("alert").filter({ hasText: `Folio didn't connect to ${host}.` }).waitFor();
+    await settings.getByRole("alert").filter({ hasText: `Mnemark didn't connect to ${host}.` }).waitFor();
     assert.deepEqual(await asked(), [`Open ${host}?`]);
     assert.deepEqual(served, []);
     // Agreeing connects. Only the approved address is reached, with the key.

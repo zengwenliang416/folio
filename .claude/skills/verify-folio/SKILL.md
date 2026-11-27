@@ -36,7 +36,7 @@ through the main process's inspector. It then prints the pid, port, data dir and
 ports, so parallel worktrees never share a run, a data dir or a port. A second agent in the same checkout passes its
 own `--run <name>`. `start` refuses a run whose processes are still alive. Never drive or stop a run you did not start.
 
-**Operator data.** Folio's own data dir, `~/Library/Application Support/Folio`, is never used. `main.cjs` honors
+**Operator data.** Mnemark's own data dir, `~/Library/Application Support/Mnemark`, is never used. `main.cjs` honors
 `FOLIO_TEST_USER_DATA` only in an unpackaged app, and this script always runs the checkout unpackaged. Doctor fails if
 a process of the run has a file open under `~/Library/Application Support`.
 
@@ -118,7 +118,7 @@ Stable handles, all inside `page`, from `scripts/smoke-test.mjs` and `scripts/sm
 
 - Library: buttons `Try a sample document` (opens `public/sample.pdf`, 4 pages), `Open a PDF` and `Open from URL`.
 - Header: buttons `Toggle sidebar (⌘\)`, `Ask AI`, `Search (⌘F)` (match `/^Search/`) and `More`, whose menu holds
-  `About Folio` and `New tab`. Toolbar `Tools` holds `Select`, `Highlight`, `Draw`, `Text`, `Sign` and `Edit mode`.
+  `About Mnemark` and `New tab`. Toolbar `Tools` holds `Select`, `Highlight`, `Draw`, `Text`, `Sign` and `Edit mode`.
 - Sidebar (`aside.sidebar`): tabs `Pages`, `Outline` and `Notes`; buttons `Page N`, `Bookmark page N`, `Bookmarked`
   and `Organize pages`; thumbnails `.thumb[data-page="N"]`.
 - Page bar: textbox `Page number`. With two or more documents open, tablist `Open documents` names each tab, and

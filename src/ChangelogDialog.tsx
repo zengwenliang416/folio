@@ -24,12 +24,12 @@ export function ChangelogDialog({ upgradeNotes, onClose }: { upgradeNotes?: Rele
       <div className="changelog">
         {upgradeNotes ? upgradeNotes.map((r) => (
           <section key={r.version}>
-            <h3>Folio {r.version}</h3>
+            <h3>Mnemark {r.version}</h3>
             <ChangeList release={r} />
           </section>
         )) : releases.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((r, i) => (
           <details key={r.version} open={i === 0}>
-            <summary>Folio {r.version}</summary>
+            <summary>Mnemark {r.version}</summary>
             <ChangeList release={r} />
           </details>
         ))}

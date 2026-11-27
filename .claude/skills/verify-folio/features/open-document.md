@@ -39,7 +39,7 @@ It prints one `step` line per action and `PASS open-document evidence <dir>`. Ea
 - **Library.** Buttons `Try a sample document`, `Open a PDF` and `Open from URL` show, and there is no heading
   `Recent`.
 - **Sample.** `page.getByRole("button", { name: /Try a sample/ }).click()`. `.doc-title` reads `Folio sample.pdf`, a
-  `.textLayer` span renders, `window.title()` is `Folio sample.pdf — Folio`, and there is no tablist.
+  `.textLayer` span renders, `window.title()` is `Folio sample.pdf — Mnemark`, and there is no tablist.
 - **New tab.** `page.getByRole("button", { name: "More", exact: true }).click()`, then
   `page.getByRole("menuitem", { name: /New tab/ }).click()`. Tablist `Open documents` holds tabs `Folio sample.pdf` and
   `Library`, with `Library` selected. Heading `Recent` shows a button named `/^Folio sample /` that reads `4 pages`.
@@ -47,7 +47,7 @@ It prints one `step` line per action and `PASS open-document evidence <dir>`. Ea
   The `Library` tab becomes the selected tab `arabic-editing.pdf`, the title follows, and `native()` holds one
   `fileChooser` call with that path.
 - **Switch.** `docs.getByRole("tab", { name: "Folio sample.pdf", exact: true }).click()`. That tab is selected and the
-  title is `Folio sample.pdf — Folio`.
+  title is `Folio sample.pdf — Mnemark`.
 - **Close.** `docs.getByRole("button", { name: "Close arabic-editing.pdf", exact: true }).click()`. The tablist is gone
   and `.doc-title` reads `Folio sample.pdf`.
 - **Recent.** `New tab` again. `Recent` lists `arabic-editing` (`1 page`) and `Folio sample`.

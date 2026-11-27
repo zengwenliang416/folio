@@ -79,7 +79,7 @@ function createCustomEndpoint({ fetch, resolve, confirmLocal, safeStorage, file,
         throw new Error(`${nameOf(baseUrl)} now leads to an address on this computer or your network that you haven't approved. Connect it again in Settings.`);
       }
       if (error?.code === "public_refused") {
-        throw new Error(`${nameOf(baseUrl)} now leads to an address outside this computer and your local network, so Folio sent nothing over plain http. Check your network, or use an https:// address.`);
+        throw new Error(`${nameOf(baseUrl)} now leads to an address outside this computer and your local network, so Mnemark sent nothing over plain http. Check your network, or use an https:// address.`);
       }
       throw new Error(`Couldn't reach ${nameOf(baseUrl)}. Check the address and your connection, and that the server is running.`);
     }
@@ -119,7 +119,7 @@ function createCustomEndpoint({ fetch, resolve, confirmLocal, safeStorage, file,
       try { destination = await resolve(url); } catch { throw new Error(`Couldn't find ${url.host}. Check the address.`); }
       if (url.protocol === "http:" && !destination.allLocal) throw new Error(HTTPS_ONLY);
       // Nothing is sent to a local address until the person agrees, in the same prompt Folio uses for links.
-      if (destination.local && !(await confirmLocal(url, destination.addresses))) throw new Error(`Folio didn't connect to ${url.host}.`);
+      if (destination.local && !(await confirmLocal(url, destination.addresses))) throw new Error(`Mnemark didn't connect to ${url.host}.`);
       const local = destination.local ? { origin: destination.origin, addresses: destination.addresses } : null;
       await listModels({ baseUrl, key, local });
       // One atomic rename keeps the key paired with its destination even if Folio exits during the save.
@@ -141,7 +141,7 @@ function createCustomEndpoint({ fetch, resolve, confirmLocal, safeStorage, file,
       if (!validModel(model)) throw new Error("Choose a model for your custom endpoint in Settings.");
       const endpoint = await connection();
       const passage = messages.at(-1)?.context;
-      if (document.truncated && !passage) throw new Error("This document exceeds Folio’s whole-document limit. Select a passage and ask again.");
+      if (document.truncated && !passage) throw new Error("This document exceeds Mnemark’s whole-document limit. Select a passage and ask again.");
       const { instructions, input } = chatRequest(model, passage
         ? { ...document, text: `[Page ${passage.page}]\n${passage.text}`, truncated: true } : document, messages);
       const body = JSON.stringify({ model, messages: [{ role: "system", content: instructions }, ...input], stream: true });

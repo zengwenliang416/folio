@@ -6,7 +6,7 @@ export default async function openDocument({ page, window, step, openFile, nativ
   const selected = (name) => docs.getByRole("tab", { name, exact: true, selected: true }).waitFor();
   const recent = page.getByRole("heading", { name: "Recent" });
   const card = (name) => page.getByRole("button", { name: new RegExp(`^${name} `) });
-  const title = (name) => window.waitForFunction((t) => document.title === t, `${name} — Folio`);
+  const title = (name) => window.waitForFunction((t) => document.title === t, `${name} — Mnemark`);
   const rendered = () => page.locator(".textLayer span:not(.markedContent)").first().waitFor({ timeout: 30_000 });
   const newTab = async () => {
     await page.getByRole("button", { name: "More", exact: true }).click();

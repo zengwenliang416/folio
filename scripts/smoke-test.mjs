@@ -88,7 +88,7 @@ try {
   // An older profile has a sidebar preference but has never recorded its Folio version.
   await page.evaluate(() => localStorage.removeItem("folio:last-opened-version"));
   await page.reload();
-  await whatsNew.getByRole("heading", { name: "Folio " + installed, exact: true }).waitFor();
+  await whatsNew.getByRole("heading", { name: "Mnemark " + installed, exact: true }).waitFor();
   assert.equal(await whatsNew.locator("section").count(), 1);
   assert.ok(await whatsNew.getByRole("listitem").count() > 0);
   await whatsNew.getByRole("button", { name: "Done" }).click();
@@ -96,9 +96,9 @@ try {
 
   await page.evaluate(() => localStorage.setItem("folio:last-opened-version", "1.13.1"));
   await page.reload();
-  await whatsNew.getByRole("heading", { name: "Folio 1.14.0", exact: true }).waitFor();
-  assert.equal(await whatsNew.locator("h3").first().textContent(), "Folio " + installed);
-  assert.equal(await whatsNew.getByRole("heading", { name: "Folio 1.13.1", exact: true }).count(), 0);
+  await whatsNew.getByRole("heading", { name: "Mnemark 1.14.0", exact: true }).waitFor();
+  assert.equal(await whatsNew.locator("h3").first().textContent(), "Mnemark " + installed);
+  assert.equal(await whatsNew.getByRole("heading", { name: "Mnemark 1.13.1", exact: true }).count(), 0);
   await page.keyboard.press("Escape");
   assert.equal(await page.getByRole("dialog").count(), 0);
   await page.reload();
@@ -128,8 +128,8 @@ try {
   });
   const before = await layout();
   await page.getByRole("button", { name: "More", exact: true }).click();
-  await page.getByRole("menuitem", { name: "About Folio" }).click();
-  await page.getByRole("dialog", { name: "About Folio" }).waitFor();
+  await page.getByRole("menuitem", { name: "About Mnemark" }).click();
+  await page.getByRole("dialog", { name: "About Mnemark" }).waitFor();
   await page.keyboard.press("r");
   await page.keyboard.press("2");
   await page.waitForTimeout(200);
@@ -555,8 +555,8 @@ try {
   await page.getByRole("tab", { name: /Pages/ }).click();
 
   await page.getByRole("button", { name: "More" }).click();
-  await page.getByRole("menuitem", { name: "About Folio" }).click();
-  const about = page.getByRole("dialog", { name: "About Folio" });
+  await page.getByRole("menuitem", { name: "About Mnemark" }).click();
+  const about = page.getByRole("dialog", { name: "About Mnemark" });
   assert.doesNotMatch(await about.innerText(), /Ask AI accounts/);
   assert.equal(await about.getByRole("button", { name: "Settings" }).count(), 0);
   await page.keyboard.press("Escape");
@@ -585,7 +585,7 @@ try {
   await summaries.first().waitFor();
   const firstPage = await summaries.allTextContents();
   assert.equal(firstPage.length, 5);
-  assert.equal(firstPage[0], "Folio " + installed);
+  assert.equal(firstPage[0], "Mnemark " + installed);
   assert.equal(await whatsNew.locator("details[open]").count(), 1);
   await summaries.nth(1).click();
   assert.ok(await whatsNew.locator("details").nth(1).locator("li").first().isVisible());
@@ -1013,7 +1013,7 @@ try {
   await page.getByRole("tab", { name: /^Notes/ }).click();
   const documentNote = page.getByLabel("Notes about this document");
   await documentNote.fill("Note in the other tab");
-  const readerName = await page.evaluate(() => document.title.replace(/ — Folio$/, ""));
+  const readerName = await page.evaluate(() => document.title.replace(/ — Mnemark$/, ""));
   await page.keyboard.press("ControlOrMeta+t");
   await page.getByRole("button", { name: "More", exact: true }).click();
   await page.getByRole("menuitem", { name: /^Settings/ }).click();

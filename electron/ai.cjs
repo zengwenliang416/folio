@@ -169,9 +169,9 @@ async function verifyIdToken(idToken, clientId, nonce) {
   return payload;
 }
 
-const CALLBACK_PAGE = `<!doctype html><meta charset="utf-8"><title>Folio</title>
+const CALLBACK_PAGE = `<!doctype html><meta charset="utf-8"><title>Mnemark</title>
 <body style="font:16px system-ui;display:grid;place-items:center;height:90vh;color:#222">
-<p>You can close this tab and return to Folio.</p></body>`;
+<p>You can close this tab and return to Mnemark.</p></body>`;
 
 let signInInProgress = null;
 // The page of the sign-in that is waiting for the browser, kept so it can be opened again.
@@ -241,14 +241,14 @@ async function signInChatGPT() {
         code_challenge_method: "S256",
         ext_agent_host_id: host.hostId,
       };
-      if (!host.clientId) params.agent_name_hint = "Folio";
+      if (!host.clientId) params.agent_name_hint = "Mnemark";
       signInPage = `${AUTHORIZE_URL}?${new URLSearchParams(params)}`;
       await shell.openExternal(signInPage);
 
       const query = await Promise.race([callback, timeout]);
       signInPage = null; // answered: the page has done its job
       const clientId = host.clientId || query.get("client_id");
-      if (!clientId) throw new Error("ChatGPT didn't finish registering Folio. Please try again.");
+      if (!clientId) throw new Error("ChatGPT didn't finish registering Mnemark. Please try again.");
       // Keep the issued client ID for every later sign-in on this computer, even if the rest fails.
       if (!host.clientId) saveHost({ ...host, clientId });
       const exchange = await postForm(TOKEN_URL, {
@@ -259,7 +259,7 @@ async function signInChatGPT() {
       const claims = await verifyIdToken(tokens.id_token, clientId, nonce);
       const scopes = String(tokens.scope || query.get("scope") || "").split(/[\s+]+/);
       if (!scopes.includes("chatgpt.tokens.use.direct")) {
-        throw new Error("ChatGPT plan usage wasn't granted. Sign in again and allow Folio to use your plan.");
+        throw new Error("ChatGPT plan usage wasn't granted. Sign in again and allow Mnemark to use your plan.");
       }
       await saveSession({
         accessToken: tokens.access_token, refreshToken: tokens.refresh_token, idToken: tokens.id_token,
@@ -277,7 +277,7 @@ async function signInChatGPT() {
 let refreshing = null;
 async function accessToken(force = false) {
   const current = await loadSession();
-  if (!current) throw Object.assign(new Error("Continue with ChatGPT to use your plan in Folio."), { code: "signed_out" });
+  if (!current) throw Object.assign(new Error("Continue with ChatGPT to use your plan in Mnemark."), { code: "signed_out" });
   if (!force && current.expiresAt - 60_000 > Date.now()) return current.accessToken;
   // Refresh tokens rotate: never run two refreshes at once.
   refreshing ??= (async () => {
@@ -294,7 +294,7 @@ async function accessToken(force = false) {
     const t = result.json;
     // Signed out while this refresh was in flight: don't bring the session back.
     if (!session || session.refreshToken !== current.refreshToken) {
-      throw Object.assign(new Error("Continue with ChatGPT to use your plan in Folio."), { code: "signed_out" });
+      throw Object.assign(new Error("Continue with ChatGPT to use your plan in Mnemark."), { code: "signed_out" });
     }
     await saveSession({ ...current, accessToken: t.access_token, refreshToken: t.refresh_token ?? current.refreshToken,
       idToken: t.id_token ?? current.idToken, expiresAt: Date.now() + (t.expires_in ?? 3600) * 1000 });

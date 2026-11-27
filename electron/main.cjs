@@ -268,7 +268,7 @@ function createWindow() {
     minHeight: 480,
     show: false,
     backgroundColor: TITLEBAR[theme].color,
-    title: "Folio",
+    title: "Mnemark",
     icon: path.join(__dirname, process.platform === "win32" ? "icon.ico" : "icon.png"),
     titleBarStyle: "hidden",
     // macOS keeps its traffic lights (inset into the top bar); Windows and Linux draw their window
@@ -296,7 +296,7 @@ function createWindow() {
     if (contents !== cameraOwner || permission !== "media" || !details.isMainFrame
       || !trustedCameraOrigin(details.requestingUrl) || !details.mediaTypes?.length
       || details.mediaTypes.some(type => type !== "video")) return callback(false);
-    dialog.showMessageBox(win, { type: "question", title: "Use camera for signature?", message: "Allow Folio to use your camera to capture a signature?",
+    dialog.showMessageBox(win, { type: "question", title: "Use camera for signature?", message: "Allow Mnemark to use your camera to capture a signature?",
       detail: "Camera images are processed on this device. No microphone is requested.", buttons: ["Allow camera", "Cancel"], defaultId: 1, cancelId: 1 })
       .then(result => callback(result.response === 0)).catch(() => callback(false));
   });
@@ -367,7 +367,7 @@ function createWindow() {
       cancelId: 1,
       title: "Unsaved changes",
       message: "One or more tabs have unsaved changes.",
-      detail: `Press ${IS_MAC ? "⌘S" : "Ctrl+S"} in each marked tab to save a copy before closing Folio.`,
+      detail: `Press ${IS_MAC ? "⌘S" : "Ctrl+S"} in each marked tab to save a copy before closing Mnemark.`,
     });
     if (choice === 0) e.preventDefault();
   });
@@ -469,12 +469,12 @@ async function downloadPdf(url, approvedLocal, signal) {
     request.on("redirect", (_status, _method, redirectUrl) => {
       const next = new URL(redirectUrl, url);
       if (++hops > 10) return finish({ error: "That link redirects too many times." });
-      if (next.protocol !== "http:" && next.protocol !== "https:") return finish({ error: "That link redirects somewhere Folio can't open." });
+      if (next.protocol !== "http:" && next.protocol !== "https:") return finish({ error: "That link redirects somewhere Mnemark can't open." });
       url = next;
       request.followRedirect();
     });
     request.on("error", () => finish({ error: guard.refusedLocal()
-      ? "That link leads to a local network address, so Folio didn't follow it." : `Couldn't reach ${url.hostname}.` }));
+      ? "That link leads to a local network address, so Mnemark didn't follow it." : `Couldn't reach ${url.hostname}.` }));
     request.on("response", (response) => {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return finish({ error: `The server responded with ${response.statusCode}${response.statusMessage ? " " + response.statusMessage : ""}.` });

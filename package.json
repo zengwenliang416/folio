@@ -59,7 +59,7 @@
     "vite": "^8.3.6",
     "vitest": "^4.1.12"
   },
-  "productName": "Folio",
+  "productName": "Mnemark",
   "description": "A simple, clean PDF reader for Windows, macOS, and Linux",
   "license": "MIT",
   "homepage": "https://github.com/Forward-Future/folio",
@@ -69,7 +69,7 @@
   "main": "electron/main.cjs",
   "build": {
     "appId": "app.folio.reader",
-    "productName": "Folio",
+    "productName": "Mnemark",
     "electronLanguages": [
       "en-US"
     ],
@@ -96,11 +96,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Folio",
-      "artifactName": "Folio-Setup.exe"
+      "shortcutName": "Mnemark",
+      "artifactName": "Mnemark-Setup.exe"
     },
     "portable": {
-      "artifactName": "Folio-Portable.exe"
+      "artifactName": "Mnemark-Portable.exe"
     },
     "fileAssociations": [
       {
@@ -171,10 +171,10 @@
       ],
       "identity": "-",
       "hardenedRuntime": false,
-      "artifactName": "Folio-mac.${ext}"
+      "artifactName": "Mnemark-mac.${ext}"
     },
     "dmg": {
-      "artifactName": "Folio-mac.dmg"
+      "artifactName": "Mnemark-mac.dmg"
     },
     "linux": {
       "target": [
@@ -190,7 +190,7 @@
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/msword"
       ],
-      "executableName": "folio",
+      "executableName": "mnemark",
       "syncDesktopName": true,
       "extraResources": [
         {
@@ -200,10 +200,10 @@
       ]
     },
     "appImage": {
-      "artifactName": "Folio-linux-x86_64.AppImage"
+      "artifactName": "Mnemark-linux-x86_64.AppImage"
     },
     "deb": {
-      "artifactName": "Folio-linux-amd64.deb",
+      "artifactName": "Mnemark-linux-amd64.deb",
       "afterInstall": "build/linux/after-install.tpl",
       "afterRemove": "build/linux/after-remove.tpl"
     }
