@@ -1,7 +1,10 @@
-# Folio
+# Mnemark
 
 A fast, clean PDF reader for Windows, macOS, and Linux. Read, highlight, annotate, sign, and ask AI about your
-documents. Free and open source, with no Folio account required.
+documents. Free and open source, with no Mnemark account required.
+
+Mnemark is based on [Forward-Future/folio](https://github.com/Forward-Future/folio), which is released under the
+[MIT license](LICENSE).
 
 ![Folio with the Ask AI panel open, answering a question about the document with page citations](docs/screenshots/ask-ai.png)
 
