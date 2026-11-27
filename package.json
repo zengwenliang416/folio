@@ -68,7 +68,7 @@
   },
   "main": "electron/main.cjs",
   "build": {
-    "appId": "app.folio.reader",
+    "appId": "io.github.zengwenliang416.mnemark",
     "productName": "Mnemark",
     "electronLanguages": [
       "en-US"
